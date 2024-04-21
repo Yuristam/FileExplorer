@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using FileExplorer.CMD;
+
+string rootFolder = @"D:\YourFilePath";
+FileSystemExplorer fileSystemExplorer = new FileSystemExplorer(rootFolder);
+fileSystemExplorer.Traverse();
