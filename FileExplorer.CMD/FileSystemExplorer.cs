@@ -11,6 +11,11 @@ public class FileSystemExplorer : IFileSystemExplorer, IEnumerable<string>
     public event EventHandler Start;
     public event EventHandler Finish;
 
+    public event EventHandler<FileSystemEventArgs> FileFound;
+    public event EventHandler<FileSystemEventArgs> DirectoryFound;
+    public event EventHandler<FileSystemEventArgs> FilteredFileFound;
+    public event EventHandler<FileSystemEventArgs> FilteredDirectoryFound;
+
     public FileSystemExplorer(string rootFolder)
     {
         _rootFolder = rootFolder;
@@ -57,21 +62,48 @@ public class FileSystemExplorer : IFileSystemExplorer, IEnumerable<string>
 
     public void Traverse(string folderPath, List<string> paths)
     {
-        paths.Add($"Folder: {folderPath}");
-
         try
         {
             foreach (string file in Directory.GetFiles(folderPath))
             {
-                if (_filter == null || _filter(file))
+                FileSystemEventArgs args = new FileSystemEventArgs(file);
+                FileFound?.Invoke(this, args);
+
+                if (!args.ShouldExclude)
                 {
                     paths.Add($"- File: {file}");
+                    if (_filter == null || _filter(file))
+                    {
+                        FilteredFileFound?.Invoke(this, args);
+                        if (!args.ShouldExclude)
+                        {
+                            paths.Add($"- Filtered File: {file}");
+                        }
+                    }
                 }
             }
 
             foreach (string subFolder in Directory.GetDirectories(folderPath))
             {
-                Traverse(subFolder, paths);
+                FileSystemEventArgs args = new FileSystemEventArgs(subFolder);
+                DirectoryFound?.Invoke(this, args);
+
+                if (!args.ShouldExclude)
+                {
+                    paths.Add($"Folder: {subFolder}");
+                    if (_filter == null || _filter(subFolder))
+                    {
+                        FilteredDirectoryFound?.Invoke(this, args);
+                        if (!args.ShouldExclude)
+                        {
+                            Traverse(subFolder, paths);
+                        }
+                    }
+                    else
+                    {
+                        Traverse(subFolder, paths); // Continue traversal regardless of filtering
+                    }
+                }
             }
 
         }
