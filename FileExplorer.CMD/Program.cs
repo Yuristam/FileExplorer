@@ -10,6 +10,19 @@ Func<string, bool> filter = path => path.EndsWith(".png", StringComparison.Ordin
 FileSystemExplorer fileSystemExplorer = new FileSystemExplorer(rootFolder, filter);
 //FileSystemExplorer fileSystemExplorer = new FileSystemExplorer(rootFolder);
 
+
+// Events
+fileSystemExplorer.Start += (sender, eventArgs) =>
+{
+    Console.WriteLine("Traversal started...");
+};
+
+fileSystemExplorer.Finish += (sender, eventArgs) =>
+{
+    Console.WriteLine("Traversal finished!");
+};
+
+
 foreach (string item in fileSystemExplorer)
 {
     Console.WriteLine(item);
