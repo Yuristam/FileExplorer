@@ -6,6 +6,10 @@ string userInput = Console.ReadLine().Trim();
 
 string rootFolder = @$"{userInput}";
 
-FileSystemExplorer fileSysteExplorer = new FileSystemExplorer(rootFolder);
+Func<string, bool> filter = path => Path.GetExtension(path).Equals(".jpeg", StringComparison.OrdinalIgnoreCase);
 
-fileSysteExplorer.Traverse();
+FileSystemExplorer fileSystemExplorer = new FileSystemExplorer(rootFolder, filter);
+
+//FileSystemExplorer fileSystemExplorer = new FileSystemExplorer(rootFolder);
+
+fileSystemExplorer.Traverse();

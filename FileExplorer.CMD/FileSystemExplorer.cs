@@ -3,10 +3,17 @@
 public class FileSystemExplorer : IFileSystemExplorer
 {
     private readonly string _rootFolder;
+    private readonly Func<string, bool> _filter;
 
     public FileSystemExplorer(string rootFolder)
     {
         _rootFolder = rootFolder;
+    }
+
+    public FileSystemExplorer(string rootFolder, Func<string, bool> filter)
+    {
+        _rootFolder = rootFolder;
+        _filter = filter ?? (path => true);
     }
 
     public void Traverse()
@@ -31,7 +38,14 @@ public class FileSystemExplorer : IFileSystemExplorer
 
             foreach (string file in files)
             {
-                Console.WriteLine($"- File: {file}");
+                if (_filter == null)
+                {
+                    Console.WriteLine($"- File: {file}");
+                }
+                else if (_filter(file))
+                {
+                    Console.WriteLine($"- File: {file}");
+                }
             }
 
             string[] subFolders = Directory.GetDirectories(folderPath);
@@ -54,5 +68,4 @@ public class FileSystemExplorer : IFileSystemExplorer
             Console.WriteLine($"Error accessing folder '{folderPath}': {ex.Message}");
         }
     }
-
 }
