@@ -2,5 +2,5 @@
 
 public interface IFileSystemExplorer
 {
-    void Traverse();
+    void Traverse(string folderPath, List<string> paths);
 }

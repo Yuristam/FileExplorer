@@ -1,6 +1,8 @@
-﻿namespace FileExplorer.CMD;
+﻿using System.Collections;
 
-public class FileSystemExplorer : IFileSystemExplorer
+namespace FileExplorer.CMD;
+
+public class FileSystemExplorer : IFileSystemExplorer, IEnumerable<string>
 {
     private readonly string _rootFolder;
     private readonly Func<string, bool> _filter;
@@ -16,43 +18,40 @@ public class FileSystemExplorer : IFileSystemExplorer
         _filter = filter ?? (path => true);
     }
 
-    public void Traverse()
+    public IEnumerator<string> GetEnumerator()
     {
-        if (Directory.Exists(_rootFolder))
+        List<string> paths = new List<string>();
+        Traverse(_rootFolder, paths);
+        foreach (var path in paths)
         {
-            TraverseFolder(_rootFolder);
-        }
-        else
-        {
-            Console.WriteLine("There is no such directory.");
+            yield return path;
         }
     }
 
-    private void TraverseFolder(string folderPath)
+    IEnumerator IEnumerable.GetEnumerator()
     {
-        Console.WriteLine($"Folder: {folderPath}");
+        return GetEnumerator();
+    }
+
+    public void Traverse(string folderPath, List<string> paths)
+    {
+        paths.Add($"Folder: {folderPath}");
 
         try
         {
-            string[] files = Directory.GetFiles(folderPath);
-
-            foreach (string file in files)
+            foreach (string file in Directory.GetFiles(folderPath))
             {
                 if (_filter == null)
                 {
-                    Console.WriteLine($"- File: {file}");
+                    paths.Add($"- File: {file}");
                 }
                 else if (_filter(file))
-                {
-                    Console.WriteLine($"- File: {file}");
-                }
+                    paths.Add($"- File: {file}");
             }
 
-            string[] subFolders = Directory.GetDirectories(folderPath);
-
-            foreach (string subFolder in subFolders)
+            foreach (string subFolder in Directory.GetDirectories(folderPath))
             {
-                TraverseFolder(subFolder);
+                Traverse(subFolder, paths);
             }
         }
         catch (UnauthorizedAccessException)
