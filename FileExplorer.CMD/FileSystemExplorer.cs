@@ -1,6 +1,6 @@
 ﻿namespace FileExplorer.CMD;
 
-public class FileSystemExplorer
+public class FileSystemExplorer : IFileSystemExplorer
 {
     private readonly string _rootFolder;
 
@@ -11,7 +11,14 @@ public class FileSystemExplorer
 
     public void Traverse()
     {
-        TraverseFolder(_rootFolder);
+        if (Directory.Exists(_rootFolder))
+        {
+            TraverseFolder(_rootFolder);
+        }
+        else
+        {
+            Console.WriteLine("There is no such directory.");
+        }
     }
 
     private void TraverseFolder(string folderPath)
@@ -24,11 +31,11 @@ public class FileSystemExplorer
 
             foreach (string file in files)
             {
-                Console.WriteLine($"File: {file}");
+                Console.WriteLine($"- File: {file}");
             }
 
             string[] subFolders = Directory.GetDirectories(folderPath);
-            
+
             foreach (string subFolder in subFolders)
             {
                 TraverseFolder(subFolder);
@@ -47,4 +54,5 @@ public class FileSystemExplorer
             Console.WriteLine($"Error accessing folder '{folderPath}': {ex.Message}");
         }
     }
+
 }
